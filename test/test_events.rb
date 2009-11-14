@@ -102,4 +102,17 @@ class TestEvents < Test::Unit::TestCase
     assert_equal "foo1\r\n", @server.gets
     assert_equal true, @server.empty?
   end
+
+  test "catch exception on event" do
+    bot = mock_bot {
+      on :channel, /(foo)/ do |a|
+        raise "HERE"
+      end
+    }
+    bot_is_connected
+
+    bot.dispatch(:channel, :message => "foo")
+
+    assert_equal "PRIVMSG  : I'm sorry, but something went wrong.\r\n", @server.gets
+  end
 end

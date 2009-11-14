@@ -90,9 +90,9 @@ module Isaac
         begin
           break if invoke(block) == false
         rescue StandardError => e
-          puts "-"*80
-          puts e.inspect
-          puts "-"*80
+          $stderr.puts "-"*80
+          $stderr.puts e.inspect
+          $stderr.puts "-"*80
           msg channel, "#{nick} I'm sorry, but something went wrong."
         end
       end

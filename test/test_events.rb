@@ -67,16 +67,39 @@ class TestEvents < Test::Unit::TestCase
     assert_equal "bar\r\n", @server.gets
   end
 
-  test "only specified number of captures are handed to block args" do
+  test "propagate events with equals regular expressions" do
     bot = mock_bot {
-      on :channel, /(foo) (bar)/ do |a|
-        raw "#{a}"
+      on :channel, /(foo)/ do |a|
+        raw "#{a}1"
+      end
+      on :channel, /(foo)/ do |a|
+        raw "#{a}2"
       end
     }
     bot_is_connected
 
-    bot.dispatch(:channel, :message => "foo bar")
+    bot.dispatch(:channel, :message => "foo")
 
-    assert_equal "foo\r\n", @server.gets
+    assert_equal "foo1\r\n", @server.gets
+    assert_equal "foo2\r\n", @server.gets
+  end
+
+
+  test "don't propagate events" do
+    bot = mock_bot {
+      on :channel, /(foo)/ do |a|
+        raw "#{a}1"
+        return false
+      end
+      on :channel, /(foo)/ do |a|
+        raw "#{a}2"
+      end
+    }
+    bot_is_connected
+
+    bot.dispatch(:channel, :message => "foo")
+
+    assert_equal "foo1\r\n", @server.gets
+    assert_equal true, @server.empty?
   end
 end
